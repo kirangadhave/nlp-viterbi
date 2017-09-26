@@ -97,7 +97,7 @@ def viterbi(words, pos_tags):
                 backpointers.at[t, w] = max_sum_k
 
     print(backpointers)
-    # print(score)
+    print(score)
     seq = [score[words[-1]].idxmax()]
     w_p = words[-1]
     words.reverse()
