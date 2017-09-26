@@ -134,5 +134,8 @@ for sentence in sentences:
 
     print()
     print("BEST TAG SEQUENCE HAS LOG PROBABILITY")
-
-    return
+    s = sentence.split(' ')
+    s.reverse()
+    output[3].reverse()
+    for i,w in enumerate(s):
+        print(w + " -> " + output[3][i])
