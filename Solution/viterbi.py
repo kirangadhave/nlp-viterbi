@@ -14,7 +14,6 @@ prob_matrix = {}
 transition_matrix = {}
 emission_matrix = {}
 
-word_dict = {}
 
 
 with open(prob_file) as f:
@@ -28,13 +27,14 @@ for x in prob_matrix:
     else:
         emission_matrix[x] = prob_matrix[x]
 
-words = "bear fishes".split(' ')
+words = "bears fish".split(' ')
 
 
 def sequence(score, w):
     print(score)
 
 def viterbi(words, pos_tags):
+    word_dict = {}
 
     c = 0
     for w in words:
@@ -96,8 +96,9 @@ def viterbi(words, pos_tags):
                 score.at[t, w] = log(pw, 2) + max_sum
                 backpointers.at[t, w] = max_sum_k
 
-    print(backpointers)
-    print(score)
+    # print(backpointers)
+    # print(score)
+    max_log_prob = max(list(score[words[-1]]))
     seq = [score[words[-1]].idxmax()]
     w_p = words[-1]
     words.reverse()
@@ -105,8 +106,7 @@ def viterbi(words, pos_tags):
         seq.append(backpointers.at[seq[-1], w_p])
         w_p = w
     seq.reverse()
-    return seq
+    return word_dict, score, backpointers, seq, max_log_prob
 
 
 print(viterbi(words, pos_tags))
-print(word_dict)
