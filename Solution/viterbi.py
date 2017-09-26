@@ -37,7 +37,6 @@ def viterbi(words, pos_tags):
         w = c
         c += 1
     words = list(word_dict.keys())
-    print(words)
 
     col_length = len(words)
     row_length = len(pos_tags)
@@ -61,8 +60,17 @@ def viterbi(words, pos_tags):
     # Iteration
     for i, w in enumerate(words):
         if i != 0:
-            w_prev = words[i-1]
+            w_prev = words[i - 1]
             for j, t in enumerate(pos_tags):
+                max_sum = []
+
+                for k,a in enumerate(pos_tags):
+                    pt = transition_matrix.get((t, a))
+                    if pt is None:
+                        pt = 0.0001
+                    s = float(score.at[a, w_prev])
+                    max_sum.append(s + log(pt, 2))
+                max_sum = max(max_sum)
                 # score_list = score.ix[:,w_prev].tolist()
 
                 # prev_t = t
@@ -79,7 +87,7 @@ def viterbi(words, pos_tags):
                 if pw is None:
                     pw = 0.0001
 
-                # score.at[t, w] = log(pw, 2) + max_sum
+                score.at[t, w] = log(pw, 2) + max_sum
 
     # print(backpointers)
     print(score)
