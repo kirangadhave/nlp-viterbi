@@ -48,6 +48,9 @@ def viterbi(words, pos_tags):
     score = pd.DataFrame(np.zeros(col_length*row_length).reshape(row_length, col_length), index = pos_tags, columns = words)
     backpointers = score.copy()
     backpointers = backpointers[words].astype(str)
+    for_probs = score.copy()
+
+
     # Initialization
     w = words[0]
     for t in pos_tags:
@@ -62,19 +65,25 @@ def viterbi(words, pos_tags):
         score.at[t, w] = log(pw, 2) + log(pt, 2)
         backpointers.at[t, w] = str(0)
 
+        for_probs.at[t, w] = pw*pt
+
     # Iteration
     for i, w in enumerate(words):
         if i != 0:
             w_prev = words[i - 1]
             for j, t in enumerate(pos_tags):
                 max_sum_dict = {}
+                prob_sum_list = []
 
                 for k,a in enumerate(pos_tags):
                     pt = transition_matrix.get((t, a))
                     if pt is None:
                         pt = 0.0001
                     s = float(score.at[a, w_prev])
+                    p = float(for_probs.at[a, w_prev])
                     max_sum_dict[a] = (s + log(pt, 2))
+                    prob_sum_list.append(p*pt)
+
                 max_sum_k = max(max_sum_dict, key = max_sum_dict.get)
                 max_sum = max_sum_dict[max_sum_k]
 
@@ -96,8 +105,11 @@ def viterbi(words, pos_tags):
                 score.at[t, w] = log(pw, 2) + max_sum
                 backpointers.at[t, w] = max_sum_k
 
-    # print(backpointers)
-    # print(score)
+                prob = pw*sum(prob_sum_list)
+                for_probs.at[t,w] = prob
+
+    # Termination, backtracking
+    print(for_probs)
     max_log_prob = max(list(score[words[-1]]))
     seq = [score[words[-1]].idxmax()]
     w_p = words[-1]
@@ -106,7 +118,7 @@ def viterbi(words, pos_tags):
         seq.append(backpointers.at[seq[-1], w_p])
         w_p = w
     seq.reverse()
-    return word_dict, score, backpointers, seq, max_log_prob
+    return word_dict, score, backpointers, seq, for_probs, max_log_prob
 
 sentences = []
 
@@ -118,6 +130,20 @@ print_seq = ["noun", "verb", "inf", "prep"]
 
 for sentence in sentences:
     output = viterbi(sentence.split(' '), pos_tags)
+
+    for_alg_dict = {}
+
+    for_mat = output[4]
+    for w in output[0]:
+        for t in print_seq:
+            denom = 0
+            for tag in pos_tags:
+                denom = denom + for_mat.at[tag, w]
+
+            lex_prob = for_mat.at[t, w]/denom
+            print(lex_prob)
+            for_alg_dict[str(output[0][w] + " = " + t)] = lex_prob
+
     print("PROCESSING SENTENCE: " + sentence)
     print()
     print("FINAL VITERBI NETWORK")
@@ -133,7 +159,7 @@ for sentence in sentences:
                 print("P(" + output[0][word] + "=" + tag + ") = " + output[2].at[tag, word])
 
     print()
-    print("BEST TAG SEQUENCE HAS LOG PROBABILITY")
+    print("BEST TAG SEQUENCE HAS LOG PROBABILITY = " + str(output[5]))
     s = sentence.split(' ')
     s.reverse()
     output[3].reverse()
