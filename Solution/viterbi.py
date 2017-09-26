@@ -132,4 +132,7 @@ for sentence in sentences:
             if output[2].at[tag, word] != "0":
                 print("P(" + output[0][word] + "=" + tag + ") = " + output[2].at[tag, word])
 
+    print()
     print("BEST TAG SEQUENCE HAS LOG PROBABILITY")
+
+    return
