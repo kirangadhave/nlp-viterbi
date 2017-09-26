@@ -109,7 +109,7 @@ def viterbi(words, pos_tags):
                 for_probs.at[t,w] = prob
 
     # Termination, backtracking
-    print(for_probs)
+    # print(for_probs)
     max_log_prob = max(list(score[words[-1]]))
     seq = [score[words[-1]].idxmax()]
     w_p = words[-1]
@@ -141,27 +141,34 @@ for sentence in sentences:
                 denom = denom + for_mat.at[tag, w]
 
             lex_prob = for_mat.at[t, w]/denom
-            print(lex_prob)
-            for_alg_dict[str(output[0][w] + " = " + t)] = lex_prob
+            for_alg_dict[(w,t)] = lex_prob
+
 
     print("PROCESSING SENTENCE: " + sentence)
     print()
     print("FINAL VITERBI NETWORK")
     for word in output[0].keys():
         for tag in print_seq:
-            print("P(" + output[0][word] + "=" + tag + ") = " + str(round(output[1].at[tag, word], 4)))
+            print("P(" + output[0][word] + "=" + tag + ") = " + str('%.4f' % round(output[1].at[tag, word], 4)))
 
     print()
     print("FINAL BACKPTR NETWORK")
     for word in output[0].keys():
         for tag in print_seq:
             if output[2].at[tag, word] != "0":
-                print("P(" + output[0][word] + "=" + tag + ") = " + output[2].at[tag, word])
+                print("Backptr(" + output[0][word] + "=" + tag + ") = " + output[2].at[tag, word])
 
     print()
-    print("BEST TAG SEQUENCE HAS LOG PROBABILITY = " + str(output[5]))
+    print("BEST TAG SEQUENCE HAS LOG PROBABILITY = " + str('%.4f' % round(output[5], 4)))
     s = sentence.split(' ')
     s.reverse()
     output[3].reverse()
     for i,w in enumerate(s):
         print(w + " -> " + output[3][i])
+
+    print()
+    print("FORWARD ALGORITHM RESULTS")
+    for p in for_alg_dict:
+        print("P(" + output[0][p[0]] + "=" + p[1] + ") = " + str('%.4f' % round(for_alg_dict[p], 4)))
+    print()
+    print()
