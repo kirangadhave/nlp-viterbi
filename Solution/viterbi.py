@@ -14,6 +14,9 @@ prob_matrix = {}
 transition_matrix = {}
 emission_matrix = {}
 
+word_dict = {}
+
+
 with open(prob_file) as f:
     for x in f.readlines():
         arr = x.strip().split(' ')
@@ -25,11 +28,13 @@ for x in prob_matrix:
     else:
         emission_matrix[x] = prob_matrix[x]
 
-words = "bears fish".split(' ')
+words = "bear fishes".split(' ')
 
+
+def sequence(score, w):
+    print(score)
 
 def viterbi(words, pos_tags):
-    word_dict = {}
 
     c = 0
     for w in words:
@@ -42,7 +47,7 @@ def viterbi(words, pos_tags):
     row_length = len(pos_tags)
     score = pd.DataFrame(np.zeros(col_length*row_length).reshape(row_length, col_length), index = pos_tags, columns = words)
     backpointers = score.copy()
-
+    backpointers = backpointers[words].astype(str)
     # Initialization
     w = words[0]
     for t in pos_tags:
@@ -55,7 +60,7 @@ def viterbi(words, pos_tags):
             pt = 0.0001
 
         score.at[t, w] = log(pw, 2) + log(pt, 2)
-        backpointers.at[t, w] = 0
+        backpointers.at[t, w] = str(0)
 
     # Iteration
     for i, w in enumerate(words):
@@ -69,9 +74,10 @@ def viterbi(words, pos_tags):
                     if pt is None:
                         pt = 0.0001
                     s = float(score.at[a, w_prev])
-                    max_sum_dict[k] = (s + log(pt, 2))
+                    max_sum_dict[a] = (s + log(pt, 2))
                 max_sum_k = max(max_sum_dict, key = max_sum_dict.get)
                 max_sum = max_sum_dict[max_sum_k]
+
                 # score_list = score.ix[:,w_prev].tolist()
 
                 # prev_t = t
@@ -87,11 +93,20 @@ def viterbi(words, pos_tags):
                 pw = emission_matrix.get((word_dict[w], t))
                 if pw is None:
                     pw = 0.0001
-                print(max_sum_k)
                 score.at[t, w] = log(pw, 2) + max_sum
                 backpointers.at[t, w] = max_sum_k
-    # print(backpointers)
+
+    print(backpointers)
     # print(score)
+    seq = [score[words[-1]].idxmax()]
+    w_p = words[-1]
+    words.reverse()
+    for w in words[1:]:
+        seq.append(backpointers.at[seq[-1], w_p])
+        w_p = w
+    seq.reverse()
+    return seq
 
 
-viterbi(words, pos_tags)
+print(viterbi(words, pos_tags))
+print(word_dict)
