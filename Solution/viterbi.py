@@ -62,15 +62,16 @@ def viterbi(words, pos_tags):
         if i != 0:
             w_prev = words[i - 1]
             for j, t in enumerate(pos_tags):
-                max_sum = []
+                max_sum_dict = {}
 
                 for k,a in enumerate(pos_tags):
                     pt = transition_matrix.get((t, a))
                     if pt is None:
                         pt = 0.0001
                     s = float(score.at[a, w_prev])
-                    max_sum.append(s + log(pt, 2))
-                max_sum = max(max_sum)
+                    max_sum_dict[k] = (s + log(pt, 2))
+                max_sum_k = max(max_sum_dict, key = max_sum_dict.get)
+                max_sum = max_sum_dict[max_sum_k]
                 # score_list = score.ix[:,w_prev].tolist()
 
                 # prev_t = t
@@ -86,9 +87,9 @@ def viterbi(words, pos_tags):
                 pw = emission_matrix.get((word_dict[w], t))
                 if pw is None:
                     pw = 0.0001
-
+                print(max_sum_k)
                 score.at[t, w] = log(pw, 2) + max_sum
-
+                backpointers.at[t, w] = max_sum_k
     # print(backpointers)
     # print(score)
 
