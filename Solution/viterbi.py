@@ -90,7 +90,7 @@ def viterbi(words, pos_tags):
                 score.at[t, w] = log(pw, 2) + max_sum
 
     # print(backpointers)
-    print(score)
+    # print(score)
 
 
 viterbi(words, pos_tags)
