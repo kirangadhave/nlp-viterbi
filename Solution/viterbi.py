@@ -108,5 +108,28 @@ def viterbi(words, pos_tags):
     seq.reverse()
     return word_dict, score, backpointers, seq, max_log_prob
 
+sentences = []
 
-print(viterbi(words, pos_tags))
+with open(words_file) as f:
+    for s in f.readlines():
+        sentences.append(s.strip())
+
+print_seq = ["noun", "verb", "inf", "prep"]
+
+for sentence in sentences:
+    output = viterbi(sentence.split(' '), pos_tags)
+    print("PROCESSING SENTENCE: " + sentence)
+    print()
+    print("FINAL VITERBI NETWORK")
+    for word in output[0].keys():
+        for tag in print_seq:
+            print("P(" + output[0][word] + "=" + tag + ") = " + str(round(output[1].at[tag, word], 4)))
+
+    print()
+    print("FINAL BACKPTR NETWORK")
+    for word in output[0].keys():
+        for tag in print_seq:
+            if output[2].at[tag, word] != "0":
+                print("P(" + output[0][word] + "=" + tag + ") = " + output[2].at[tag, word])
+
+    print("BEST TAG SEQUENCE HAS LOG PROBABILITY")
