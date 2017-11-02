@@ -2,7 +2,7 @@ a)  Programming language used: Python
     Version: Python3.6
 
 b)  Instructions for running:
-    1. cd into the ngrams directory.
+    1. cd into the Solution directory.
 
     2. Type - "python3.6 viterbi <probabilities_file> <sentence_files>"
 
